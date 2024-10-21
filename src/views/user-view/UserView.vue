@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SearchForm, SearchFormItem } from '@/components/search-form';
-import { Input, InputNumber, Select } from 'ant-design-vue';
+import { DatePicker, Input, InputNumber, Select } from 'ant-design-vue';
 import { h } from 'vue';
 
 const searchFormItems: SearchFormItem[] = [
@@ -17,6 +17,18 @@ const searchFormItems: SearchFormItem[] = [
       ],
     }),
   },
+  {
+    label: 'Status',
+    name: 'status',
+    component: h(Select, {
+      allowClear: true,
+      options: [
+        { label: 'Enabled', value: 'enabled' },
+        { label: 'Disabled', value: 'disabled' },
+      ],
+    }),
+  },
+  { label: 'Birth Date', name: 'birthDate', component: DatePicker },
 ];
 </script>
 

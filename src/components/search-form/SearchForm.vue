@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { SearchFormItem } from './types';
 import {
   Button,
@@ -11,10 +11,15 @@ import {
   Row,
 } from 'ant-design-vue';
 import { DownOutlined, UpOutlined } from '@ant-design/icons-vue';
+import { useElementSize } from '@vueuse/core';
 
-const props = defineProps<{
-  items: SearchFormItem[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    items: SearchFormItem[];
+    labelSpan?: number;
+  }>(),
+  { labelSpan: 8 },
+);
 
 const emits = defineEmits<{
   search: [model: typeof formModel.value];
@@ -23,11 +28,48 @@ const emits = defineEmits<{
 }>();
 
 const expanded = ref(false);
+const containerRef = ref<HTMLDivElement | null>(null);
+const { width: containerWidth } = useElementSize(containerRef);
+const responsiveAttrs = computed(() => {
+  const allCount = props.items.length;
+  if (containerWidth.value > 920) {
+    return {
+      count: expanded.value ? allCount : 3,
+      span: 6,
+      layout: 'inline',
+      labelCol: { span: props.labelSpan },
+      wrapperCol: { span: 24 - props.labelSpan },
+    };
+  } else if (containerWidth.value > 730) {
+    return {
+      count: expanded.value ? allCount : 2,
+      span: 8,
+      layout: 'inline',
+      labelCol: { span: props.labelSpan },
+      wrapperCol: { span: 24 - props.labelSpan },
+    };
+  } else if (containerWidth.value > 480) {
+    return {
+      count: expanded.value ? allCount : 1,
+      span: 12,
+      layout: 'vertical',
+      labelCol: { span: 24 },
+      wrapperCol: { span: 24 },
+    };
+  } else {
+    return {
+      count: expanded.value ? allCount : 1,
+      span: 24,
+      layout: 'vertical',
+      labelCol: { span: 24 },
+      wrapperCol: { span: 24 },
+    };
+  }
+});
 const formRef = ref<FormInstance | null>(null);
 const formModel = ref<Record<string, unknown>>({});
 
 const reset = () => {
-  console.log(formRef.value?.getFieldsValue());
   formRef.value!.resetFields();
   emits('reset');
 };
@@ -38,35 +80,58 @@ const expandHandler = () => {
 </script>
 
 <template>
-  <div class="search-form">
+  <div class="search-form" ref="containerRef">
     <Form
       :model="formModel"
-      layout="inline"
+      :layout="responsiveAttrs.layout"
       ref="formRef"
-      :labelCol="{ span: 6 }"
-      :wrapperCol="{ span: 18 }"
+      :labelCol="responsiveAttrs.labelCol"
+      :wrapperCol="responsiveAttrs.wrapperCol"
       class="form-wrapper"
     >
-      <Row class="form-row">
-        <Col :span="6" v-for="item in items" :key="item.name">
-          <FormItem :name="item.name" :label="item.label">
+      <Row
+        class="form-row"
+        :class="{ vertical: responsiveAttrs.layout === 'vertical' }"
+      >
+        <Col
+          :span="responsiveAttrs.span"
+          v-for="(item, index) in items"
+          :key="item.name"
+          v-show="index < responsiveAttrs.count"
+        >
+          <FormItem
+            :name="item.name"
+            :label="item.label"
+            :hidden="index >= responsiveAttrs.count"
+          >
             <component :is="item.component"
             :[item.model||'value']="formModel[item.name]"
             :[`onUpdate:${item.model||'value'}`]="(value:unknown) => {
             formModel[item.name] = value } " />
           </FormItem>
         </Col>
-        <Col :span="6">
+        <div
+          :span="responsiveAttrs.span"
+          class="rest-container"
+          :class="{
+            'rest-center': responsiveAttrs.span === 12,
+          }"
+        >
           <Flex justify="flex-end" :gap="12" align="center">
             <Button @click="reset">Reset</Button>
             <Button type="primary">Query</Button>
-            <Button type="link" class="expand-toggle" @click="expandHandler">
+            <Button
+              type="link"
+              class="expand-toggle"
+              @click="expandHandler"
+              v-if="responsiveAttrs.count < items.length || expanded"
+            >
               {{ expanded ? 'Collapsed' : 'Expand' }}
               <UpOutlined v-if="expanded" />
               <DownOutlined v-else />
             </Button>
           </Flex>
-        </Col>
+        </div>
       </Row>
     </Form>
   </div>
@@ -78,13 +143,25 @@ const expandHandler = () => {
     width: 100%;
     display: flex;
     flex-flow: row wrap;
-    :deep(.ant-form-item-control-input-content) {
-      > :first-child {
-        width: 100%;
+    &:not(.vertical) {
+      row-gap: 24px;
+    }
+    :deep(.ant-form-item) {
+      .ant-form-item-control-input-content {
+        > :first-child {
+          width: 100%;
+        }
       }
     }
     .expand-toggle {
       padding: 0;
+    }
+    .rest-container {
+      flex: 1;
+      justify-content: flex-end;
+      &.rest-center {
+        padding-top: 30px;
+      }
     }
   }
 }
