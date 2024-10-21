@@ -1,11 +1,29 @@
 <script setup lang="ts">
-import UserSearchForm from './user-search-form/UserSearchForm.vue';
+import { SearchForm, SearchFormItem } from '@/components/search-form';
+import { Input, InputNumber, Select } from 'ant-design-vue';
+import { h } from 'vue';
+
+const searchFormItems: SearchFormItem[] = [
+  { label: 'Name', name: 'name', component: Input },
+  { label: 'Age', name: 'age', component: InputNumber },
+  {
+    label: 'Gender',
+    name: 'gender',
+    component: h(Select, {
+      allowClear: true,
+      options: [
+        { label: 'Male', value: 'male' },
+        { label: 'Female', value: 'female' },
+      ],
+    }),
+  },
+];
 </script>
 
 <template>
   <div class="user-view">
     <div class="form-wrapper">
-      <UserSearchForm></UserSearchForm>
+      <SearchForm :items="searchFormItems"></SearchForm>
     </div>
   </div>
 </template>
