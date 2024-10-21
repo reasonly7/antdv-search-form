@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { Button } from 'ant-design-vue'
+import UserView from './views/user-view/UserView.vue';
 </script>
 
 <template>
-  <div>
-    <Button type="primary">Hello, World!</Button>
-  </div>
+  <UserView></UserView>
 </template>
 
 <style scoped lang="less"></style>
