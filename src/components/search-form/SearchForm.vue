@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { SearchFormItem } from './types';
-import { Button, Form, FormInstance, FormItem } from 'ant-design-vue';
+import { Button, Form, FormInstance, FormItem, Input } from 'ant-design-vue';
 import { DownOutlined, UpOutlined } from '@ant-design/icons-vue';
 import { useElementSize } from '@vueuse/core';
 import { cloneDeep } from 'lodash-es';
@@ -92,7 +92,7 @@ const expandHandler = () => {
         v-show="index < responsiveAttrs.count"
         :class="responsiveAttrs.width"
       >
-        <component :is="item.component" style="width: 100%;"
+        <component :is="item.component || Input" style="width: 100%;"
         :[item.model||'value']="formModel[item.name]"
         :[`onUpdate:${item.model||'value'}`]="(value:unknown) => {
         formModel[item.name] = value } " />
