@@ -30,7 +30,7 @@ const responsiveAttrs = computed(() => {
   const allCount = props.items.length;
   if (containerWidth.value > 1000) {
     return expanded.value && allCount > 3
-      ? { count: allCount, width: 'w-1-3', layout: 'horizontal' }
+      ? { count: allCount, width: 'w-1-4', layout: 'horizontal' }
       : { count: 3, width: 'w-1-4', layout: 'horizontal' };
   } else if (containerWidth.value > 700) {
     return expanded.value && allCount > 2
